@@ -13,36 +13,41 @@ type CartItem = {
 
 type CartContextType = {
   cartItems: CartItem[];
-  addToCart: (id: number, qnt: number) => void;
+  addToCart: (id: number, qnt?: number) => void;
+  removeFromCart: (id: number) => void;
 };
 
 export const CartContext = createContext<CartContextType>({
   cartItems: [],
   addToCart: () => {},
+  removeFromCart: () => {},
 });
 
 export function CartContextProvider({ children }: CartContextProviderProps) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   const addToCart = (id: number, qnt: number = 1) => {
-  setCartItems((prev) => {
-    const exist = prev.find((item) => item.id === id);
+    setCartItems((prev) => {
+      const exist = prev.find((item) => item.id === id);
 
-    if (exist) {
-      // اگه آیتم از قبل هست، تعدادشو زیاد کن
-      return prev.map((item) =>
-        item.id === id ? { ...item, qnt: item.qnt + qnt } : item
-      );
-    } else {
-      // اگه نیست یه آیتم جدید با تعداد qnt اضافه کن
+      if (exist) {
+        return prev.map((item) =>
+          item.id === id ? { ...item, qnt: item.qnt + qnt } : item
+        );
+      }
+
       return [...prev, { id, qnt }];
-    }
-  });
-};
+    });
+  };
 
+  const removeFromCart = (id: number) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart }}>
+    <CartContext.Provider
+      value={{ cartItems, addToCart, removeFromCart }}
+    >
       {children}
     </CartContext.Provider>
   );
